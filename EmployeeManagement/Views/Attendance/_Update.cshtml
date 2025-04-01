@@ -1,0 +1,65 @@
+@using EmployeeManagement.Dto
+@using EmployeeManagement.Enum
+@{
+    // get user name
+    var userName = User.Identity.Name;
+    var isAdmin = User.IsInRole(nameof(Role.ADMIN)) || User.IsInRole(nameof(Role.SUPPER_ADMIN));
+}
+@foreach (var attendance in Model.GenericResponse.Data)
+{
+    <div id="editAttendanceModal@(attendance.Id)" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Edit" asp-controller="Attendance" asp-route-Id="@attendance.Id" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Chỉnh sửa bản ghi điểm danh</h4>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="EmployeeId">Nhân viên</label>
+                            @if(isAdmin){
+                                 <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                                @{
+                                    var employees = ViewData["employees"] as List<EmployeeViewDto>;
+                                    foreach (var employee in employees)
+                                    {
+                                        if (attendance != null && employee.Id == attendance.EmployeeID)
+                                        {
+                                            <option value="@employee.Id" selected>@employee.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@employee.Id">@employee.Name</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            }
+                            else {
+                                <input type="text" class="form-control" id="EmployeeId" name="EmployeeId"
+                                       value="@attendance.EmployeeName" readonly>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label for="editAttendanceDate">Ngày</label>
+                            <input type="date" class="form-control" id="editAttendanceDate" name="Date"
+                                   value="@attendance.Date.ToString("yyyy-MM-dd")" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editNotes">Ghi chú</label>
+                            <textarea class="form-control" id="editNotes" name="Notes"
+                                      rows="3">@attendance.Notes</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

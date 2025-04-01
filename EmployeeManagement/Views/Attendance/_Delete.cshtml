@@ -1,0 +1,46 @@
+﻿<!-- Delete Attendance Modal -->
+@foreach (var attendance in Model.GenericResponse.Data)
+{
+    <div id="deleteAttendanceModal@(attendance.Id)" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Delete" asp-controller="Attendance" method="post">
+                    <input type="hidden" name="Id" value="@attendance.Id" />
+                    <div class="modal-header">
+                        <h4 class="modal-title">Xóa bản ghi điểm danh</h4>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa bản ghi điểm danh này?</p>
+                        <p class="text-warning"><small>Hành động này không thể hoàn tác.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy">
+                        <input type="submit" class="btn btn-danger" value="Xóa">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+<div id="deleteAll" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h4 class="modal-title">Xóa điểm danh</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa ?</p>
+                    <p class="text-warning"><small>Hành động này không thể hoàn tác.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy">
+                    <input id="deletesByIds" class="btn btn-danger" value="Xóa">
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

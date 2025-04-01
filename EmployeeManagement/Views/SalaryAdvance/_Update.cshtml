@@ -1,0 +1,48 @@
+﻿@using EmployeeManagement.Dto
+
+@foreach (var advance in Model.GenericResponse.Data.Item2)
+{
+    <div id="editSalaryAdvanceModal@(advance.Id)" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Edit" asp-controller="SalaryAdvance" asp-route-Id="@advance.Id" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Chỉnh sửa ứng lương</h4>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="editEmployeeCode">Mã nhân viên</label>
+                            <input type="text" class="form-control" id="editEmployeeCode" name="EmployeeCode"
+                                   value="@advance.EmployeeCode" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmployeeName">Tên nhân viên</label>
+                            <input type="text" class="form-control" id="editEmployeeName" name="EmployeeName"
+                                   value="@advance.EmployeeName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAdvanceDate">Ngày ứng lương</label>
+                            <input type="date" class="form-control" id="editAdvanceDate" name="AdvanceDate"
+                                   value="@advance.AdvanceDate.ToString("yyyy-MM-dd")" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAdvanceAmountString">Số tiền ứng lương</label>
+                            <input type="text" class="form-control number-format" id="editAdvanceAmountString" name="AdvanceAmountString"
+                                   value="@advance.AdvanceAmountString" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDescription">Mô tả</label>
+                            <textarea class="form-control" id="editDescription" name="Description"
+                                      rows="3">@advance.Description</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

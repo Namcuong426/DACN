@@ -1,0 +1,105 @@
+﻿<!-- Registration Form - Bootstrap Brain Component -->
+<style>
+    .bg-image {
+        background-image: url('/assets/background.jpg');
+        background-size: cover; /* Ensures the image covers the entire background */
+        background-position: center; /* Centers the image */
+        background-repeat: no-repeat; /* Prevents the image from repeating */
+        height: 100%;
+        display: flex;
+        align-items: center
+    }
+</style>
+<section class=" bg-image bg-light py-3 py-md-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+                <div class="card border border-light-subtle rounded-3 shadow-sm">
+                    <div class="card-body p-3 p-md-4 p-xl-5">
+                        <div class="text-center mb-3">
+                            <a href="#!">
+                                <img src="~/assets/avatar.png" alt="BootstrapBrain Logo" width="175" height="175">
+                            </a>
+                        </div>
+                        <h2 class="fs-6 fw-normal text-center text-secondary mb-4">Đăng ký tài khoản</h2>
+                        <form asp-action="Register" asp-controller="Account" method="post">
+                            <div class="row gy-2 overflow-hidden">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input name="UserName" type="email" class="form-control" id="UserName" placeholder="name@example.com" required>
+                                        <label for="UserName" class="form-label">Email</label>
+                                        <!-- Placeholder for Email validation error -->
+                                        <span class="text-danger" id="emailError"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control" name="Password" id="password" placeholder="Password" required>
+                                        <label for="password" class="form-label">Password</label>
+                                        <!-- Placeholder for Password validation error -->
+                                        <span class="text-danger" id="passwordError"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="password" class="form-control" name="ConfirmPassword" id="confirmPassword" placeholder="Confirm Password" required>
+                                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                        <!-- Placeholder for Confirm Password validation error -->
+                                        <span class="text-danger" id="confirmPasswordError"></span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-grid my-3">
+                                        <button class="btn btn-primary btn-lg" type="submit">Đăng ký</button>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <p class="m-0 text-secondary text-center">Bạn đã có tài khoản? <a href="/Account/Login" class="link-primary text-decoration-none">Đăng nhập</a></p>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@section scripts {
+    <script>
+    // Example script to handle form submission and display validation errors
+    document.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent default form submission
+        let hasErrors = false;
+
+        // Clear previous errors
+        document.getElementById('emailError').textContent = '';
+        document.getElementById('passwordError').textContent = '';
+        document.getElementById('confirmPasswordError').textContent = '';
+
+        // Perform validation
+        const email = document.getElementById('UserName').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!email) {
+            document.getElementById('emailError').textContent = 'Vui lòng nhập email';
+            hasErrors = true;
+        }
+        if (!password) {
+            document.getElementById('passwordError').textContent = 'Vui lòng nhập mật khẩu';
+            hasErrors = true;
+        }
+        if (password !== confirmPassword) {
+            document.getElementById('confirmPasswordError').textContent = 'Mật khẩu không khớp';
+            hasErrors = true;
+        }
+
+        // If no errors, submit the form
+        if (!hasErrors) {
+            event.target.submit();
+        }
+    });
+</script>
+}

@@ -1,0 +1,241 @@
+﻿@using EmployeeManagement.Dto
+@using EmployeeManagement.Enum
+@using EmployeeManagement.Helper
+@{
+    var userName = User.Identity.Name;
+    var isAdmin = User.IsInRole(nameof(Role.ADMIN)) || User.IsInRole(nameof(Role.SUPPER_ADMIN));
+    var insurances = Model.Insurances;
+    int currentMonth = DateTime.Now.Month;
+    var pageSize = (int)TempData["PageSize"];
+}
+
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="mb-0">
+            @if (isAdmin)
+            {
+                <text>Quản lý bảo hiểm</text>
+            }
+            else
+            {
+                <text>Bảo hiểm</text>
+            }
+        </h6>
+    </div>
+
+    @if (isAdmin)
+    {
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addInsuranceModal">Thêm mới</button>
+        @* <button type="button" class="btn btn-danger" id="deleteSelected" data-toggle="modal" data-target="#deleteAll">Xoá mục đã chọn</button> *@
+    }
+
+    <form id="searchForm" method="get" asp-action="Index" asp-controller="Insurance" class="d-flex justify-content-between">
+        <div class="form-group" style="flex-basis: 100%; margin-right: 10px;">
+            <label for="searchInput">Tìm kiếm bảo hiểm</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" name="search" placeholder="Tên bảo hiểm">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" type="submit">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @if (isAdmin)
+                {
+                    <th><input type="checkbox" id="selectAll"><label for="selectAll"></label></th>
+                }
+                <th>Tên Bảo hiểm</th>
+                <th>Tên Nhân viên</th>
+                <th>Mô tả</th>
+                <th>Số tiền</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var insurance in insurances)
+            {
+                <tr>
+                    @if (isAdmin)
+                    {
+                        <td><input type="checkbox" id="@(insurance.Id)" name="options[]" value="@(insurance.Id)"><label for="checkbox@(insurance.Id)"></label></td>
+                    }
+                    <td>@insurance.InsuranceName</td>
+                    @foreach (var employee in ViewData["employees"] as List<EmployeeViewDto>)
+                    {
+                        if (insurance != null && employee.Id == insurance.EmployeeID)
+                        {
+                            <td>@employee.Name</td>
+                        }
+                    }
+                    <td>@insurance.Description</td>
+                    <td>@StringHelper.FormatNumber(insurance.PremiumAmount)</td>
+                    <td>
+                        <div class="btn-group">
+                       @*      <button type="button" class="detail btn btn-info btn-sm rounded-0 h-button-custom"
+                                    data-toggle="modal" data-target="#detailInsuranceModal@(insurance.Id)">
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Chi tiết"></i>
+                            </button> *@
+                            @if (isAdmin)
+                            {
+                                <button type="button" class="edit btn btn-success btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#editInsuranceModal@(insurance.Id)">
+                                    <i class="fa fa-edit mr-2" data-toggle="tooltip" title="Sửa"></i>
+                                </button>
+
+                                <div id="editInsuranceModal@(insurance.Id)" class="modal fade">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form asp-action="Edit" asp-controller="Insurance" method="post">
+                                                <input type="hidden" name="Id" value="@insurance.Id" />
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Chỉnh sửa bảo hiểm</h4>
+                                                    <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label for="editInsuranceName">Tên bảo hiểm</label>
+                                                        <input type="text" class="form-control" id="editInsuranceName" name="InsuranceName"
+                                                               value="@insurance.InsuranceName" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="EmployeeId">Nhân viên nhận bảo hiểm</label>
+                                                        <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                                                            @{
+                                                                var employees = ViewData["employees"] as List<EmployeeViewDto>;
+                                                                foreach (var employee in employees)
+                                                                {
+                                                                    if (insurance != null && employee.Id == insurance.EmployeeID)
+                                                                    {
+                                                                        <option value="@employee.Id" selected>@employee.Name</option>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <option value="@employee.Id">@employee.Name</option>
+                                                                    }
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="editStartDate">Ngày bắt đầu</label>
+                                                        <input type="date" class="form-control" id="editStartDate" name="StartDate"
+                                                               value="@insurance.StartDate.ToString("yyyy-MM-dd")" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="editEndDate">Ngày hết hạn</label>
+                                                        <input type="date" class="form-control" id="editEndDate" name="EndDate"
+                                                               value="@insurance.EndDate.ToString("yyyy-MM-dd")" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="editDescription">Mô tả</label>
+                                                        <textarea class="form-control" id="editDescription" name="Description"
+                                                                  rows="3">@insurance.Description</textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="editPremiumAmount">Số tiền</label>
+                                                        <input type="number" class="form-control" id="editPremiumAmount" name="PremiumAmount"
+                                                               value="@insurance.PremiumAmount" required>
+                                                        <div class="invalid-feedback">
+                                                            Vui lòng nhập số.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                                                    <button type="submit" class="btn btn-primary">Lưu</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="delete btn btn-danger btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#deleteInsuranceModal@(insurance.Id)">
+                                    <i class="fa fa-trash" data-toggle="tooltip" title="Xóa"></i>
+                                </button>
+                                <div id="deleteInsuranceModal@(insurance.Id)" class="modal fade">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form asp-action="Delete" asp-route-id="@insurance.Id" asp-controller="Insurance" method="post">
+                                                <input type="hidden" name="Id" value="@insurance.Id" />
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Xóa bảo hiểm</h4>
+                                                    <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Bạn có chắc chắn muốn xóa bảo hiểm này?</p>
+                                                    <p class="text-warning"><small>Hành động này không thể hoàn tác.</small></p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Hủy">
+                                                    <input type="submit" class="btn btn-danger" value="Xóa">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @await Html.PartialAsync("_Add", (object)Model)
+    <div class="clearfix">
+        <div class="hint-text">
+            Hiển thị <b>@insurances.Count</b> trên tổng số <b>@Model.TotalCount</b> bảo hiểm
+        </div>
+        <ul class="pagination">
+            <!-- Pagination logic here -->
+        </ul>
+    </div>
+
+    <div class="" style="display:flex">
+        <select class="form-select" style="width:unset;" id="pageSizeSelect" onchange="changePageSize(this.value)">
+            <option value="5" selected="@(pageSize == 5 ? "selected" : null)">5</option>
+            <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10</option>
+            <option value="20" selected="@(pageSize == 20 ? "selected" : null)">20</option>
+        </select>
+    </div>
+</div>
+
+<script>
+    function changePageSize(pageSize) {
+        var url = new URL(window.location.href);
+        if (url.searchParams.has('pageSize')) {
+            url.searchParams.set('pageSize', pageSize);
+        } else {
+            url.searchParams.append('pageSize', pageSize);
+        }
+        window.location.href = url.toString();
+    }
+</script>

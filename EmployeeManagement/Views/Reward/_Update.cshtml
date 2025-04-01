@@ -1,0 +1,66 @@
+@using EmployeeManagement.Dto
+@foreach (var Reward in Model.GenericResponse.Data)
+{
+    <div id="editRewardModal@(Reward.Id)" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Edit" asp-controller="Reward" asp-route-Id="@Reward.Id" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Chỉnh sửa khen thưởng</h4>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="editRewardName">Tên khen thưởng</label>
+                            <input type="text" class="form-control" id="editRewardName" name="RewardName"
+                                value="@Reward.RewardName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="EmployeeId">Nhân viên được khen thưởng</label>
+                            <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                                @{
+                                    var employees = ViewData["employees"] as List<EmployeeViewDto>;
+                                    foreach (var employee in employees)
+                                    {
+                                        if (Reward != null && employee.Id == Reward.EmployeeID)
+                                        {
+                                            <option value="@employee.Id" selected>@employee.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@employee.Id">@employee.Name</option>
+                                        }
+                                    }
+                                }
+                            </select>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="editRewardDate">Ngày khen thưởng</label>
+                            <input type="date" class="form-control" id="editRewardDate" name="RewardDate"
+                                value="@Reward.RewardDate.ToString("yyyy-MM-dd")" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDescription">Mô tả</label>
+                            <textarea class="form-control" id="editDescription" name="Description"
+                                rows="3">@Reward.Description</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="editAmount">Số tiền</label>
+                            <input type="text" class="form-control  number-format" id="editAmount" name="AmountString" value="@Reward.AmountString"
+                                required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập số.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

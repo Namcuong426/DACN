@@ -1,0 +1,347 @@
+﻿@using EmployeeManagement.Constant
+@using EmployeeManagement.Dto
+@using EmployeeManagement.Enum
+@using System.Security.Claims
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+
+    var userName = User.Identity?.Name;
+    var isAdmin = User.IsInRole(nameof(Role.ADMIN)) || User.IsInRole(nameof(Role.SUPPER_ADMIN));
+
+    var empId = User.FindFirst("EmployeeId")?.Value;
+    var empName = User.FindFirst("EmployeeName")?.Value;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        @if(isAdmin){
+            <h6 class="mb-0">Quản lý nghỉ phép Admin</h6>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLeaveModal">
+                Thêm mới
+            </button>
+        }else {
+            <h6 class="mb-0">Quản lý nghỉ phép Nhân viên</h6>
+            <h6 class="mb-0" style="color: red;">Số ngày nghỉ phép còn lại: @ViewData["CountLeaveRemaining"]</h6>
+            <div>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#statisticsLeaveModal">
+                    Thống kê ngày nghỉ
+                </button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLeaveModal" >
+                    Thêm mới
+                </button>
+            </div>
+        }
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Mã </th>
+                <th>Tên nhân viên</th>
+                <th>Lý do nghỉ</th>
+                <th>Ngày nghỉ</th>
+                <th>Loại nghỉ</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leave in Model)
+            {
+                if(isAdmin || leave.EmployeeId == Convert.ToInt32(empId)) {
+
+                    <tr>
+                        <td>@leave.Id</td>
+                        <td>@leave.UserName</td>
+                        <td>@leave.ReasonLeave</td>
+                        <td>@leave.DateLeave.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if(@leave.LeavePermission == (int)LeavePermissionEnum.Yes){
+                                <p>@LeaveStatus.Yes</p>
+                            }else {
+                                <p>@LeaveStatus.No</p>
+                            }
+                        </td>
+                        <td aria-disabled="@(isAdmin ? "false" : "true")">
+                            @switch (@leave.Status)
+                            {
+                                case (int)LeaveStatusEnum.Success:
+                                    <p>@LeaveStatus.Success</p>
+                                    ;
+                                    break;
+                                case (int)LeaveStatusEnum.Reject:
+                                    <p>@LeaveStatus.Reject</p>
+                                    ;
+                                    break;
+                                default:
+                                    <p>@LeaveStatus.Pending</p>
+                                    ;
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group" >
+                                <button @(leave.Status == (int)LeaveStatusEnum.Success ? "disabled" : null) type="button" class="edit btn btn-success btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#editLeaveModal@(leave.Id)">
+                                    <i class="fa fa-edit  mr-2" data-toggle="tooltip" title="Sửa"></i>
+                                </button>
+                                <button type="button" class="delete btn btn-danger btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#deleteLeaveModal@(leave.Id)">
+                                    <i class="fa fa-trash" data-toggle="tooltip" title="Xóa"></i>
+                                </button>
+                                @if (isAdmin)
+                                {
+                                    <button @(leave.Status == (int)LeaveStatusEnum.Success ? "disabled" : null) type ="button" class="save btn btn-info btn-sm rounded-circle h-button-custom"
+                                            data-toggle="modal" data-target="#changeStatusLeaveModal@(leave.Id)">
+                                        <i class="fa fa-info" data-toggle="tooltip" title="Xét duyệt"></i>
+                                    </button>
+                                }
+                            </div>
+                        
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Leave Modal -->
+<div class="modal fade" id="addLeaveModal" tabindex="-1" role="dialog" aria-labelledby="addLeaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLeaveModalLabel">Thêm mới đơn nghỉ phép</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="Name">Lý do nghỉ phép</label>
+                        <input type="text" class="form-control" id="Name" name="ReasonLeave" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="LeavePermission">Loại nghỉ phép</label>
+                        <select class="form-control" id="LeavePermission" name="LeavePermission" required>
+                            <option value="0" selected>Nghỉ không phép</option>
+                            <option value="1">Nghỉ có phép</option>
+                        </select>
+                    </div>
+
+                    <!-- Ngày nghỉ phép -->
+                    <div class="form-group">
+                        <label for="DateLeave">Ngày nghỉ phép</label>
+                        <input type="date" class="form-control" id="DateLeave" name="DateLeave"
+                               min="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                    </div>
+                </div>
+                <!-- Hidden input for EmployeeId -->
+                <input type="hidden" name="EmployeeId" value="@empId" />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Delete Leave Modal -->
+@foreach (var leave in Model)
+{
+    <div class="modal fade" id="deleteLeaveModal@(leave.Id)" tabindex="-1" role="dialog" aria-labelledby="deleteLeaveModalLabel@(leave.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="Id" value="@leave.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteLeaveModalLabel@(leave.Id)">Xóa đơn nghỉ</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn xóa đơn nghỉ phép này không?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+<!-- Edit Leave Modal -->
+@foreach (var leave in Model)
+{
+    <div class="modal fade" id="editLeaveModal@(leave.Id)" tabindex="-1" role="dialog" aria-labelledby="editLeaveModalLabel@(leave.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Edit" asp-route-leaveId="@leave.Id" method="post">
+                    <input type="hidden" name="Id" value="@leave.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editLeaveModalLabel@(leave.Id)">Chỉnh sửa đơn nghỉ phép</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="ReasonLeave">Lý do xin nghỉ</label>
+                            <input type="text" class="form-control" id="ReasonLeave" name="ReasonLeave" value="@leave.ReasonLeave" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="LeavePermission">Loại nghỉ phép</label>
+                            <select class="form-control" id="LeavePermission" name="LeavePermission" required>
+                                <option value="0" selected=@(leave.LeavePermission == (int)LeavePermissionEnum.No ? "selected" : null)>Nghỉ không phép</option>
+                                <option value="1" selected=@(leave.LeavePermission == (int)LeavePermissionEnum.Yes ? "selected" : null)>Nghỉ có phép</option>
+                               x
+                            </select>
+                        </div>
+                        <!-- Ngày nghỉ phép -->
+                        <div class="form-group">
+                            <label for="DateLeave">Ngày nghỉ phép</label>
+                            <input type="date" class="form-control" id="DateLeave" name="DateLeave" value="@(leave.DateLeave.ToString("yyyy-MM-dd"))"
+                                   min="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                        </div>
+                        <!-- Hidden input for EmployeeId -->
+                        <input type="hidden" name="EmployeeId" value="@empId" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Change Status Leave Modal-->
+@foreach (var leave in Model)
+{
+    <div class="modal fade" id="changeStatusLeaveModal@(leave.Id)" tabindex="-1" role="dialog" aria-labelledby="changeStatusLeaveModalLabel@(leave.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="ChangeStatusLeave" asp-route-leaveId="@leave.Id" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changeStatusLeaveModalLabel@(leave.Id)">Chỉnh sửa trạng thái đơn nghỉ phép</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="ReasonLeave">Lý do xin nghỉ</label>
+                            <input disabled type="text" class="form-control" id="ReasonLeave" name="ReasonLeave" value="@leave.ReasonLeave" required>
+                            <br>
+                            <br>
+                            <label for="Status">Trạng thái</label>
+                            <select class="form-control" id="Status" name="Status" required>
+                                <option value="0" selected=@(leave.Status == (int)LeaveStatusEnum.Pending ? "selected" : null)>Đang chờ duyệt</option>
+                                <option value="1" selected=@(leave.Status == (int)LeaveStatusEnum.Success ? "selected" : null )>Thành công</option>
+                                <option value="2" selected=@(leave.Status == (int)LeaveStatusEnum.Reject ? "selected" : null )>Từ chối</option>
+                            </select>
+                        </div>
+                        <!-- Hidden input for EmployeeId -->
+                        <input type="hidden" name="EmployeeId" value="@leave.EmployeeId" />
+                        <input type="hidden" name="ReasonLeave" value="@leave.ReasonLeave" />
+                        <input type="hidden" name="Id" value="@leave.Id" />
+                        <input type="hidden" name="LeavePermission" value="@leave.LeavePermission" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Statistics Leave Modal -->
+<div class="modal fade" id="statisticsLeaveModal" tabindex="-1" role="dialog" aria-labelledby="statisticsLeaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="StatisticsLeave" method="post">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5 class="text-center mb-4">Thống kê ngày nghỉ phép</h5>
+                    <!-- Số liệu thống kê sẽ được hiển thị ở đây -->
+                    <div id="statisticsContent">
+                        <p class="text-center">Đang tải dữ liệu...</p>
+                    </div>
+                </div>
+                <!-- Hidden input for EmployeeId -->
+                <input type="hidden" name="EmployeeId" value="@empId" />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('#statisticsLeaveModal').on('show.bs.modal', function () {
+                const model = {
+                    EmployeeId: @empId // Thay bằng biến từ View để lấy EmployeeId
+                };
+
+                // AJAX gửi đến controller
+                $.ajax({
+                    url: '/Leave/statisticsLeave', // Thay ControllerName bằng tên controller thật
+                    method: 'POST',
+                    data: model,
+                    success: function (response) {
+                        if (response && response.success) {
+                            const data = response.data;
+                            $('#statisticsContent').html(`
+                                <table class="table table-bordered text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Loại nghỉ phép</th>
+                                            <th>Số ngày</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-success">Nghỉ có phép</td>
+                                            <td>${data.countLeaveWithPermission}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-danger">Nghỉ không phép</td>
+                                            <td>${data.countLeaveWithoutPermission}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `);
+                        } else {
+                            $('#statisticsContent').html('<p class="text-center text-danger">Không có dữ liệu!</p>');
+                        }
+                    },
+                    error: function () {
+                        $('#statisticsContent').html('<p class="text-center text-danger">Lỗi khi tải dữ liệu!</p>');
+                    }
+            });
+         });
+        });
+    </script>
+}

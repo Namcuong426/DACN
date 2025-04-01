@@ -1,0 +1,39 @@
+﻿<!-- Detail Attendance Modal -->
+@foreach (var Attendance in Model.GenericResponse.Data)
+{
+    <div class="modal fade" id="detailAttendanceModal@(Attendance.Id)" tabindex="-1" role="dialog"
+         aria-labelledby="detailAttendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailAttendanceModalLabel">Thông tin chi tiết điểm danh</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Detail Attendance -->
+                    <div class="form-group">
+                        <label for="detailEmployeeID">Mã Nhân viên</label>
+                        <input type="text" class="form-control" id="detailEmployeeID" name="detailEmployeeID"
+                               value="@Attendance.EmployeeCode" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailEmployeeID">Tên Nhân viên</label>
+                        <input type="text" class="form-control" id="detailEmployeeID" name="detailEmployeeID"
+                               value="@Attendance.EmployeeName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailDate">Ngày chấm công</label>
+                        <input type="text" class="form-control" id="detailDate" name="detailDate"
+                               value="@Attendance.Date.ToString("dd/MM/yyyy")" readonly>
+                    </div>
+               
+                    <div class="form-group">
+                        <label for="detailNotes">Ghi chú</label>
+                        <textarea class="form-control" id="detailNotes" name="detailNotes" rows="3"
+                                  readonly>@Attendance.Notes</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

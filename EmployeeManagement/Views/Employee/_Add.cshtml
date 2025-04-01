@@ -1,0 +1,229 @@
+﻿@using EmployeeManagement.Dto
+
+
+<form id="addEmployeeForm" asp-action="Add" asp-controller="Employee" method="post"
+      enctype="multipart/form-data">
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 1000px; margin-left: -40%;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="addEmployeeModalLabel">Thêm nhân viên mới</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Adding Employee -->
+                    <div class="col-12" style="display: flex;">
+
+                        <div class="col-3">
+                            <div class="form-group">
+                                <img id="imagePreview_add" src="https://st4.depositphotos.com/14953852/24787/v/450/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" class="img-thumbnail"
+                                     style="width:250px !important;height:150px !important " height="150" />
+                            </div>
+                            <div class="form-group">
+                                <label for="AvatarFile">Avatar</label>
+                                <input type="file" class="form-control" id="AvatarFile" name="AvatarFile"
+                                       accept="image/*" onchange="previewImageAdd(event)">
+                            </div>
+                        </div>
+                        <div class="col-9" style=" margin-left: 10px;">
+                            <div class="col-12" style="display: flex;">
+                                <div class="form-group col-3" style="margin-left: 10px;">
+                                    <label for="Name">Tên</label>
+                                    <input type="text" class="form-control" id="Name" name="Name" required>
+                                </div>
+                                <div class="form-group col-4" style="margin-left: 10px;">
+                                    <label for="Email">Email</label>
+                                    <input type="text" class="form-control" id="Email" name="Email" required>
+                                </div>
+                                <div class="form-group col-4" style="margin-left: 10px;">
+                                    <label for="PhoneNumber">Số điện thoại</label>
+                                    <input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber"
+                                           maxlength="10" pattern="\d{10}"
+                                           title="Số điện thoại phải bao gồm 10 chữ số" required>
+                                    <span class="error-message" style="color: red; display: none;">
+                                        Số điện thoại
+                                        phải bao gồm 10 chữ số
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-12" style="display: flex;">
+
+                                <div class="form-group col-3" style="margin-left: 10px;">
+                                    <label for="DateOfBirth">Ngày sinh</label>
+                                    <input type="date" class="form-control" id="DateOfBirth" name="DateOfBirth"
+                                           required>
+                                </div>
+                                <div class="form-group col-4" style="margin-left: 10px;">
+                                    <label for="Gender">Giới tính</label>
+                                    <select class="form-control" id="Gender" name="Gender" required>
+                                        <option value="">-- Chọn giới tính --</option>
+                                        <option value="Male">Nam</option>
+                                        <option value="Female">Nữ</option>
+                                        <option value="Other">Khác</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-4" style="margin-left: 10px;">
+                                    <label for="Address">Địa chỉ</label>
+                                    <input type="text" class="form-control" id="Address" name="Address">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="CitizenID">Chứng minh nhân dân</label>
+                        <input type="text" class="form-control" id="CitizenID" required name="CitizenID">
+                        <div class="error-message" style="display: none;">
+                            Chứng minh nhân dân phải có đúng 12
+                            chữ số.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="HireDate">Ngày vào làm</label>
+                        <input type="date" class="form-control" id="HireDate" name="HireDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Username">Tên đăng nhập</label>
+                        <input type="text" class="form-control" required id="Username" name="Username">
+                    </div>
+                    <div class="form-group">
+                        <label for="Password">Mật khẩu</label>
+                        <input type="password" class="form-control" required id="Password" name="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="IsAdmin">Quyền</label>
+                        <select class="form-control" id="Role" name="Role">
+                            <!-- <option value="1">SupperAdmin</option> -->
+                            <option value="2">Admin</option>
+                            <option value="3">User</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="IsActivated">Trạng thái kích hoạt</label>
+                        <select class="form-control" id="IsActivated" name="IsActivated">
+                            <option value="">-- Chọn trạng thái --</option>
+                            <option value="true">Kích hoạt</option>
+                            <option value="false">Chưa kích hoạt</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="col-12" style="display: flex;">
+                            <div class="form-group col-6">
+                                <label for="DepartmentID">Phòng ban</label>
+                                <select class="form-control" id="DepartmentID" required name="DepartmentID">
+                                    @if (ViewData["departments"] != null)
+                                    {
+                                        @foreach (var department in ViewData["departments"] as List<DepartmentDto>)
+                                        {
+                                            <option value="@department.Id">@department.DepartmentName</option>
+                                        }
+                                    }
+
+                                </select>
+                            </div>
+                            <div class="form-group col-6" style="margin-left: 5px;">
+                                <label for="PositionID">Chức vụ</label>
+                                <select class="form-control" id="PositionID" required name="PositionID">
+                                    @foreach (var position in ViewData["positions"] as List<PositionDto>)
+                                    {
+                                        <option value="@position.Id">@position.PositionName</option>
+                                    }
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="col-12" style="display: flex;">
+                            <div class="form-group col-6">
+                                <label for="EducationLevelID">Trình độ học vấn</label>
+                                <select class="form-control" id="EducationLevelID" required
+                                        name="EducationLevelID">
+                                    @foreach (var educationLevel in ViewData["educationLevels"] as List
+                                    <EducationLevelDto>)
+                                    {
+                                        <option value="@educationLevel.Id">
+                                            @educationLevel.EducationLevelName
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+
+                            <div class="form-group col-6" style="margin-left: 5px;">
+                                <label for="ForeignLanguageProficiency">Trình độ ngoại ngữ</label>
+                                <select class="form-control" required id="ForeignLanguageProficiency"
+                                        name="ForeignLanguageProficiency">
+                                    <option value="">-- Chọn Trình độ ngoại ngữ --</option>
+                                    <option value="true">Có ngoại ngữ</option>
+                                    <option value="false">Không có ngoại ngữ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="BasicSalary">Lương cơ bản</label>
+                            <input type="text" class="form-control number-format" id="BasicSalaryString"
+                                   name="BasicSalaryString">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập số.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Add other fields here -->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    function previewImageAdd(event) {
+
+        var reader = new FileReader();
+        reader.onload = function () {
+            var output = document.getElementById('imagePreview_add');
+            output.src = reader.result;
+            output.style.display = 'block';
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+    $(document).ready(function () {
+        $('#PhoneNumber').on('input', function () {
+            const phoneNumber = $(this).val();
+            const pattern = /^\d{10}$/;
+            if (!pattern.test(phoneNumber)) {
+                $(this).next('.error-message').show();
+            } else {
+                $(this).next('.error-message').hide();
+            }
+
+            // Loại bỏ các ký tự không phải số và giới hạn độ dài
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+        $('#CitizenID').on('input', function () {
+            const citizenID = $(this).val();
+            const pattern = /^\d{12}$/;
+            if (!pattern.test(citizenID)) {
+                $(this).siblings('.error-message').show();
+            } else {
+                $(this).siblings('.error-message').hide();
+            }
+
+            // Loại bỏ các ký tự không phải số và giới hạn độ dài
+            this.value = this.value.replace(/\D/g, '').slice(0, 12);
+        });
+    });
+
+</script>

@@ -1,0 +1,56 @@
+﻿@using EmployeeManagement.Dto
+@{
+}
+<form id="addAllowanceForm" asp-action="Add" asp-controller="Allowance" method="post">
+    <div class="modal fade" id="addAllowanceModal" tabindex="-1" role="dialog" aria-labelledby="addAllowanceModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="addAllowanceModalLabel">Thêm phụ cấp mới</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Adding Allowance -->
+                    <div class="form-group">
+                        <label for="AllowanceName">Tên phụ cấp</label>
+                        <input type="text" class="form-control" id="AllowanceName" name="AllowanceName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="EmployeeId">Nhân viên nhận phụ cấp</label>
+                        <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                            <option value="">-- Chọn nhân viên --</option>
+                            @if (ViewData["employees"] != null)
+                            {
+                                @foreach (var employee in ViewData["employees"] as List<EmployeeViewDto>)
+                                {
+                                    <option value="@employee.Id">@employee.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="AllowanceDate">Ngày phụ cấp</label>
+                        <input type="date" class="form-control" id="AllowanceDate" name="AllowanceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Description">Mô tả</label>
+                        <textarea class="form-control" id="Description" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="Amount">Số tiền</label>
+                        <input type="text" class="form-control number-format" id="Amount" name="Amount" required>
+                        <div class="invalid-feedback">
+                            Vui lòng nhập số.
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

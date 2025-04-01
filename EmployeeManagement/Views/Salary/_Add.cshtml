@@ -1,0 +1,207 @@
+﻿@using EmployeeManagement.Dto
+@{
+    int currentYear = DateTime.Now.Year;
+    int currentMonth = DateTime.Now.Month;
+    var employees = ViewData["employees"] as List<EmployeeViewDto>;
+}
+<form id="addSalaryForm" asp-action="Add" asp-controller="Salary" method="post">
+    <div class="modal fade" id="addSalaryModal" tabindex="-1" role="dialog" aria-labelledby="addSalaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="addSalaryModalLabel">Tính lương</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Adding Salary -->
+                    <div class="form-group">
+                        <label for="EmployeeId">Nhân viên</label>
+                        <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                            <option value="">-- Chọn nhân viên --</option>
+                            @if (employees != null)
+                            {
+                                @foreach (var employee in employees)
+                                {
+                                    <option value="@employee.Id">@employee.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="EmployeeID">Mã nhân viên</label>
+                        <input type="text" class="form-control" id="EmployeeID" readonly name="EmployeeID">
+                    </div>
+                    <div class="form-group">
+                        <label for="BasicSalary">Lương cơ bản</label>
+                        <input type="text" class="form-control number-format" id="BasicSalaryString" readonly name="BasicSalaryString">
+                    </div>
+                    <div class="form-group">
+                        <label for="Bonus">Tiền thưởng</label>
+                        <input type="text" class="form-control number-format" id="BonusString" name="BonusString" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="Penalty">Tiền phạt</label>
+                        <input type="text" class="form-control number-format" id="PenaltyString" name="PenaltyString" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="Allowance">Tiền phụ cấp</label>
+                        <input type="text" class="form-control number-format" id="AllowanceString" name="AllowanceString">
+                        <div class="invalid-feedback">
+                            Vui lòng nhập số.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Insurance">Tiền bảo hiểm</label>
+                        <input type="number" class="form-control number-format" id="Insurance" name="Insurance">
+                        <div class="invalid-feedback">
+                            Vui lòng nhập số.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="SalaryAdvance">Tiền đã ứng</label>
+                        <input type="text" class="form-control number-format" id="SalaryAdvanceString" name="SalaryAdvanceString" readonly>
+                        <div class="invalid-feedback">
+                            Vui lòng nhập số.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="TotalAttendance">Số ngày trên tháng</label>
+                        <input type="number" class="form-control" id="TotalDayInMonth" name="TotalDayInMonth" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="TotalAttendance">Số ngày nghỉ có phép</label>
+                        <input type="number" class="form-control" id="TotalLeaveWithPermission" name="TotalLeaveWithPermission" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="TotalAttendance">Số ngày nghỉ không phép</label>
+                        <input type="number" class="form-control" id="TotalLeaveWithoutPermission" name="TotalLeaveWithoutPermission" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="TotalAttendance">Số ngày công</label>
+                        <input type="number" class="form-control" id="TotalAttendance" name="TotalAttendance" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="text">Lương thực nhận</label>
+                        <input type="text" class="form-control" id="NetSalaryString" name="NetSalaryString" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="Month">Tháng</label>
+                        <input type="number" class="form-control" id="Month" name="Month" value="@currentMonth" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="Year">Năm</label>
+                        <input type="number" class="form-control" id="Year" name="Year" value="@currentYear" readonly>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-danger" id="exportPdfButton"  >Xuất Pdf</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<script>
+       $(document).ready(function () {
+        $('#EmployeeId').change(function () {
+            var employeeId = $(this).val();
+            var month = $('#Month').val();
+            var year = $('#Year').val();
+
+            if (employeeId) {
+                $.ajax({
+                    url: `/Salary/GetEmployeeSalary`,
+                    type: 'GET',
+                    data: { employeeId: employeeId, month: month, year: year },
+                    success: function (data) {
+                        $('#EmployeeID').val(data.employeeCode);
+                        $('#BasicSalaryString').val(data.basicSalaryString);
+                        $('#BonusString').val(data.bonusString);
+                        $('#PenaltyString').val(data.penaltyString);
+                        $('#AllowanceString').val(data.allowanceString);
+                        $('#Insurance').val(data.insurance);
+                        $('#SalaryAdvanceString').val(data.salaryAdvanceString);
+                        $('#NetSalaryString').val(data.netSalaryString);
+                        $('#TotalAttendance').val(data.totalAttendance);
+                        $('#TotalDayInMonth').val(data.totalDayInMonth);
+                        $('#TotalDayOffInMonth').val(data.totalDayOffInMonth);
+                        $('#TotalLeaveWithPermission').val(data.totalLeaveWithPermission);
+                        $('#TotalLeaveWithoutPermission').val(data.totalLeaveWithoutPermission);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            } else {
+                $('#exportPdfButton').attr('hidden', true);
+                $('#EmployeeID, #BasicSalaryString, #BonusString, #PenaltyString, #AllowanceString, #SalaryAdvanceString, #NetSalaryString, #TotalAttendance, #TotalDayInMonth, #TotalDayOffInMonth').val('');
+            }
+        });
+
+          $('#exportPdfButton').click(function () {
+    // Tạo tài liệu PDF với pdfmake
+    const docDefinition = {
+        content: [
+            { text: 'Bảng Tính Lương', style: 'header', alignment: 'center' },
+            { text: 'Nhân viên: ' + $('#EmployeeId option:selected').text() },
+            { text: 'Mã nhân viên: ' + $('#EmployeeID').val() },
+            { text: 'Lương cơ bản: ' + $('#BasicSalaryString').val() },
+            { text: 'Tiền thưởng: ' + $('#BonusString').val() },
+            { text: 'Tiền phạt: ' + $('#PenaltyString').val() },
+            { text: 'Tiền phụ cấp: ' + $('#AllowanceString').val() },
+            { text: 'Tiền đã ứng: ' + $('#SalaryAdvanceString').val() },
+            { text: 'Số ngày công: ' + $('#TotalAttendance').val() },
+            { text: 'Số ngày trên tháng: ' + $('#TotalDayInMonth').val() },
+            { text: 'Số ngày nghỉ: ' + $('#TotalDayOffInMonth').val() },
+            { text: 'Lương thực nhận: ' + $('#NetSalaryString').val() },
+            { text: 'Tháng: ' + $('#Month').val() },
+            { text: 'Năm: ' + $('#Year').val() }
+        ],
+        styles: {
+            header: {
+                fontSize: 16,
+                bold: true,
+                margin: [0, 20, 0, 20]
+            }
+        }
+    };
+
+    // Tải xuống PDF
+    pdfMake.createPdf(docDefinition).download(`Luong_${$('#EmployeeId option:selected').text()}_${$('#Month').val()}_${$('#Year').val()}.pdf`);
+});
+    
+    });
+    // Helper function to format number as '8.500.000'
+    function formatNumber(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Event listener to format the value while typing
+    $(document).on('input', '.number-format', function () {
+        let inputVal = $(this).val();
+
+        // Remove non-numeric characters (except dots)
+        inputVal = inputVal.replace(/[^0-9]/g, '');
+
+        // Parse the input value to integer
+        const numericValue = parseInt(inputVal, 10);
+
+        if (!isNaN(numericValue)) {
+            // Format the number
+            const formattedValue = formatNumber(numericValue);
+            $(this).val(formattedValue);
+            $(this).removeClass('is-invalid');
+        } else {
+            $(this).val('');
+            $(this).addClass('is-invalid');
+        }
+    });
+
+
+
+</script>

@@ -1,0 +1,44 @@
+﻿@foreach (var reward in Model.GenericResponse.Data)
+{
+    <!-- Detail Modal HTML -->
+    <div class="modal fade" id="detailRewardModal@(reward.Id)" tabindex="-1" role="dialog"
+        aria-labelledby="detailRewardModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailRewardModalLabel">Thông tin chi tiết khen thưởng</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Detail Reward -->
+                    <div class="form-group">
+                        <label for="detailRewardName">Tên khen thưởng</label>
+                        <input type="text" class="form-control" id="detailRewardName" name="detailRewardName"
+                            value="@reward.RewardName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailRewardEmployeeName">Tên nhân viên</label>
+                        <input type="text" class="form-control" id="detailRewardEmployeeName"
+                            name="detailRewardEmployeeName" value="@reward.EmployeeName" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detailRewardDate">Ngày khen thưởng</label>
+                        <input type="text" class="form-control" id="detailRewardDate" name="detailRewardDate"
+                            value="@reward.RewardDate.ToString("dd/MM/yyyy")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailDescription">Mô tả</label>
+                        <textarea class="form-control" id="detailDescription" name="detailDescription" rows="3"
+                            readonly>@reward.Description</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailAmount">Số tiền</label>
+                        <input type="text" class="form-control" id="detailAmount" name="detailAmount"
+                            value="@reward.Amount.ToString("N0")" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

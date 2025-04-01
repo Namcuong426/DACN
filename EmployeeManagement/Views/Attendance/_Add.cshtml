@@ -1,0 +1,63 @@
+﻿@using EmployeeManagement.Dto
+@using EmployeeManagement.Enum
+@{
+    // get user name
+    var userName = User.Identity.Name;
+    var isAdmin = User.IsInRole(nameof(Role.ADMIN)) || User.IsInRole(nameof(Role.SUPPER_ADMIN));
+}
+<form id="addAttendanceForm" asp-action="Add" asp-controller="Attendance" method="post">
+    <div class="modal fade" id="addAttendanceModal" tabindex="-1" role="dialog"
+        aria-labelledby="addAttendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="addAttendanceModalLabel">Thêm điểm danh mới</h4>
+                    <button type="button" class="btn-close"  data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Adding Attendance -->
+                    <div class="form-group">
+                        <label for="EmployeeId">Nhân viên </label>
+                        @if(isAdmin){
+                            <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                                <option value="">-- Chọn nhân viên --</option>
+                                @if (ViewData["employees"] != null)
+                                {
+                                    @foreach (var employee in ViewData["employees"] as List<EmployeeViewDto>)
+                                    {
+                                        <option value="@employee.Id">@employee.Name</option>
+                                    }
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                                @if (ViewData["employees"] != null)
+                                {
+                                    @foreach (var employee in ViewData["employees"] as List<EmployeeViewDto>)
+                                    {
+                                        <option value="@employee.Id">@employee.Name</option>
+                                    }
+                                }
+                            </select>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="Date">Ngày</label>
+                        <input type="date" class="form-control" id="Date" name="Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" max="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label for="Notes">Ghi chú</label>
+                        <textarea class="form-control" id="Notes" name="Notes" rows="3"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

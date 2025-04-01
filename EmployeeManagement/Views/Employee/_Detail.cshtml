@@ -1,0 +1,96 @@
+﻿@using EmployeeManagement.Dto
+
+@foreach (var employee in Model.GenericResponse.Data)
+{
+    <!-- Detail Modal HTML -->
+    <div class="modal fade" id="detailEmployeeModal@(employee.Id)" tabindex="-1" role="dialog"
+         aria-labelledby="detailEmployeeModalLabel@(employee.Id)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailEmployeeModalLabel@(employee.Id)">Thông tin chi tiết nhân viên</h4>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form for Detail Employee -->
+                    <div class="form-group">
+                        <label for="detailName@(employee.Id)">Tên</label>
+                        <input type="text" class="form-control" id="detailName@(employee.Id)" name="detailName" value="@employee.Name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <!-- Image preview -->
+                        <img src="@Url.Action("GetImage", "Employee", new { fileName = employee.Avatar })" alt="Avatar" class="img-thumbnail" style="max-width: 300px;" />
+                    </div>
+                    <div class="form-group">
+                        <label for="detailEmployeeCode@(employee.Id)">Mã nhân viên</label>
+                        <input type="text" class="form-control" id="detailEmployeeCode@(employee.Id)" name="EmployeeCode" value="@employee.EmployeeCode" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailEmail@(employee.Id)">Email</label>
+                        <input type="text" class="form-control" id="detailEmail@(employee.Id)" name="detailEmail" value="@employee.Email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailPhoneNumber@(employee.Id)">Số điện thoại</label>
+                        <input type="number" class="form-control" id="detailPhoneNumber@(employee.Id)" name="detailPhoneNumber" value="@employee.PhoneNumber" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailDateOfBirth@(employee.Id)">Ngày sinh</label>
+                        <input type="date" class="form-control" id="detailDateOfBirth@(employee.Id)" name="detailDateOfBirth" value="@employee.DateOfBirth.ToString("yyyy-MM-dd")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailGender@(employee.Id)">Giới tính</label>
+                        <input type="text" class="form-control" id="detailGender@(employee.Id)" name="detailGender" value="@employee.Gender" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailAddress@(employee.Id)">Địa chỉ</label>
+                        <input type="text" class="form-control" id="detailAddress@(employee.Id)" name="detailAddress" value="@employee.Address" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailCitizenID@(employee.Id)">Chứng minh nhân dân</label>
+                        <input type="text" class="form-control" id="detailCitizenID@(employee.Id)" name="detailCitizenID" value="@employee.CitizenID" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailHireDate@(employee.Id)">Ngày vào làm</label>
+                        <input type="date" class="form-control" id="detailHireDate@(employee.Id)" name="detailHireDate" value="@employee.HireDate.ToString("yyyy-MM-dd")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailDepartment@(employee.Id)">Phòng ban</label>
+                        <input type="text" class="form-control" id="detailDepartment@(employee.Id)" name="detailDepartment" value="@employee.DepartmentName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailPosition@(employee.Id)">Chức vụ</label>
+                        <input type="text" class="form-control" id="detailPosition@(employee.Id)" name="detailPosition" value="@employee.PositionName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailEducationLevel@(employee.Id)">Trình độ học vấn</label>
+                        <input type="text" class="form-control" id="detailEducationLevel@(employee.Id)" name="detailEducationLevel" value="@employee.EducationLevelName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailRole@(employee.Id)">Quyền</label>
+                        <input type="text" class="form-control" id="detailRole@(employee.Id)" name="detailRole" value="@(employee.IsAdmin ? "Admin" : "User")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailForeignLanguageProficiency@(employee.Id)">Trình độ ngoại ngữ</label>
+                        <input type="text" class="form-control" id="detailForeignLanguageProficiency@(employee.Id)" name="detailForeignLanguageProficiency" value="@(employee.ForeignLanguageProficiency ? "Có" : "Không")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailUsername@(employee.Id)">Tên đăng nhập</label>
+                        <input type="text" class="form-control" id="detailUsername@(employee.Id)" name="detailUsername" value="@employee.Username" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailIsActivated@(employee.Id)">Trạng thái kích hoạt</label>
+                        <input type="text" class="form-control" id="detailIsActivated@(employee.Id)" name="detailIsActivated" value="@(employee.IsActivated ? "Kích hoạt" : "Chưa kích hoạt")" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailBasicSalary@(employee.Id)">Lương cơ bản</label>
+                        <input type="text" class="form-control" id="detailBasicSalary@(employee.Id)" name="detailBasicSalary" value="@employee.BasicSalaryString" readonly>
+                    </div>
+                    <!-- Add other fields here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

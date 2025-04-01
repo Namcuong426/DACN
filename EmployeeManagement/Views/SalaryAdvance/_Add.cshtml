@@ -1,0 +1,50 @@
+﻿@using EmployeeManagement.Dto
+@{
+    int currentYear = DateTime.Now.Year;
+    int currentMonth = DateTime.Now.Month;
+    var employees = ViewData["employees"] as List<EmployeeViewDto>;
+}
+<div class="modal fade" id="addSalaryAdvanceModal" tabindex="-1" role="dialog" aria-labelledby="addSalaryAdvanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSalaryAdvanceModalLabel">Thêm Ứng Lương</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSalaryAdvanceForm" asp-action="Add" asp-controller="SalaryAdvance" method="post">
+                    <div class="form-group">
+                        <label for="EmployeeId">Nhân viên</label>
+                        <select class="form-control" id="EmployeeId" name="EmployeeId" required>
+                            <option value="">-- Chọn nhân viên --</option>
+                            @if (employees != null)
+                            {
+                                @foreach (var employee in employees)
+                                {
+                                    <option value="@employee.Id">@employee.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="AdvanceDate">Ngày ứng lương</label>
+                        <input type="date" class="form-control" id="AdvanceDate" name="AdvanceDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="AdvanceAmountString">Số tiền ứng lương</label>
+                        <input type="text" class="form-control number-format" id="AdvanceAmountString" name="AdvanceAmountString" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Description">Mô tả</label>
+                        <input type="text" class="form-control" id="Description" name="Description">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

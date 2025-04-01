@@ -1,0 +1,175 @@
+﻿@using EmployeeManagement.Dto
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="mb-0">Quản lý phòng ban</h6>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addDepartmentModal">
+            Thêm mới
+        </button>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Mã </th>
+                <th>Tên phòng ban</th>
+                <th>Tên viết tắt</th>
+                <th>Ngày tạo</th>
+                <th>Ngày cập nhật</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var department in Model)
+            {
+                <tr>
+                    <td>@department.Id</td>
+                    <td>@department.DepartmentName</td>
+                    <td>@department.Abbreviation</td>
+                    <td>@department.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>@department.UpdatedAt.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        <div class="btn-group">
+                      @*       <button type="button" class="detail btn btn-info btn-sm rounded-0 h-button-custom"
+                                    data-toggle="modal" data-target="#detailDepartmentModal@(department.Id)">
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Chi tiết"></i>
+                            </button> *@
+                            <button type="button" class="edit btn btn-success btn-sm rounded-0 h-button-custom"
+                                    data-toggle="modal" data-target="#editDepartmentModal@(department.Id)">
+                                <i class="fa fa-edit  mr-2" data-toggle="tooltip" title="Sửa"></i>
+                            </button>
+                            <button type="button" class="delete btn btn-danger btn-sm rounded-0 h-button-custom"
+                                    data-toggle="modal" data-target="#deleteDepartmentModal@(department.Id)">
+                                <i class="fa fa-trash" data-toggle="tooltip" title="Xóa"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Department Modal -->
+<!-- Add Department Modal -->
+<div class="modal fade" id="addDepartmentModal" tabindex="-1" role="dialog" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDepartmentModalLabel">Thêm mới phòng ban</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="Name">Tên phòng ban</label>
+                        <input type="text" class="form-control" id="Name" name="DepartmentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Abbreviation">Viết tắt</label>
+                        <input type="text" class="form-control" id="Abbreviation" name="Abbreviation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Description">Mô tả</label>
+                        <textarea class="form-control" id="Description" name="Description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit Department Modal -->
+@foreach (var department in Model)
+{
+    <div class="modal fade" id="editDepartmentModal@(department.Id)" tabindex="-1" role="dialog" aria-labelledby="editDepartmentModalLabel@(department.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Edit" asp-route-departmentId="@department.Id" method="post">
+                    <input type="hidden" name="Id" value="@department.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editDepartmentModalLabel@(department.Id)">Chỉnh sửa phòng ban</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="Name">Tên phòng ban</label>
+                            <input type="text" class="form-control" id="Name" name="DepartmentName" value="@department.DepartmentName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Abbreviation">Tên viết tắt</label>
+                            <input type="text" class="form-control" id="Abbreviation" name="Abbreviation" value="@department.Abbreviation" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Description">Mô tả</label>
+                            <textarea class="form-control" id="Description" name="Description" rows="3">@department.Description</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+
+<!-- Delete Department Modal -->
+@foreach (var department in Model)
+{
+    <div class="modal fade" id="deleteDepartmentModal@(department.Id)" tabindex="-1" role="dialog" aria-labelledby="deleteDepartmentModalLabel@(department.Id)" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" name="Id" value="@department.Id" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteDepartmentModalLabel@(department.Id)">Xóa phòng ban</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn xóa phòng ban này không?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

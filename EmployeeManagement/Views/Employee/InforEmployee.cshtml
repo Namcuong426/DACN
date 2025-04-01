@@ -1,0 +1,309 @@
+﻿@using EmployeeManagement.Dto
+
+@foreach (var Employee in Model.GenericResponse.Data)
+{
+    <div >
+        <div class="modal-dialog">
+            <div class="modal-content" style="width: 1100px; margin-left: -60%; margin-top:-42px">
+                <form asp-action="edit" asp-controller="Employee" asp-route-Id="@Employee.Id" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Thông Tin Nhân Viên</h4>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form for Adding Employee -->
+                        <div class="col-12" style="display: flex;">
+
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <img id="imagePreview_@(Employee.Id)" class="img-thumbnail" style="width:250px !important;height:150px !important ;display:none" />
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Employee.Avatar))
+                                {
+                                    <div class="form-group" id="currentAvatar">
+                                        <label>Current Avatar</label>
+                                        <img src="@Url.Action("GetImage", "Employee" , new { fileName=Employee.Avatar })"
+                                             id="currentAvatar_@(Employee.Id)" alt="Avatar" class="img-thumbnail" style="max-width: 300px;" />
+                                    </div>
+                                }
+                       @*          <div class="form-group">
+                                    <label for="AvatarFile_@(Employee.Id)">Avatar</label>
+                                    <input type="file" class="form-control" id="AvatarFile_@(Employee.Id)" name="AvatarFile"
+                                           accept="image/*" onchange="previewImage(event, '@Employee.Id')">
+                                </div> *@
+
+
+                            </div>
+                            <div class="col-9" style=" margin-left: 10px;">
+                                <div class="col-12" style="display: flex;">
+                                    <div class="form-group col-3" style="margin-left: 10px;">
+                                        <label for="editName@(Employee.Id)">Tên nhân viên</label>
+                                        <input disabled type="text" class="form-control" id="editName@(Employee.Id)" name="Name"
+                                               value="@Employee.Name" required>
+                                    </div>
+                                    <div class="form-group col-4" style="margin-left: 10px;">
+                                        <label for="editEmail@(Employee.Id)">Email</label>
+                                        <input disabled type="email" class="form-control" id="editEmail@(Employee.Id)" name="Email"
+                                               value="@Employee.Email" required>
+                                    </div>
+                                    <div class="form-group col-4" style="margin-left: 10px;">
+                                        <label for="editPhoneNumber@(Employee.Id)">Số điện thoại</label>
+                                        <input disabled type="text" class="form-control editPhoneNumber" id="editPhoneNumber@(Employee.Id)"
+                                               name="PhoneNumber" value="@Employee.PhoneNumber" maxlength="10" pattern="\d{10}"
+                                               title="Số điện thoại phải bao gồm 10 chữ số" required>
+                                        <span class="error-message" style="color: red; display: none;">
+                                            Số điện thoại phải bao gồm 10 chữ
+                                            số
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12" style="display: flex;">
+
+                                    <div class="form-group col-3" style="margin-left: 10px;">
+                                        <label for="editDateOfBirth@(Employee.Id)">Ngày sinh</label>
+                                        <input disabled type="date" class="form-control" id="editDateOfBirth@(Employee.Id)" name="DateOfBirth"
+                                               value="@Employee.DateOfBirth.ToString("yyyy-MM-dd")" required>
+                                    </div>
+                                    <div class="form-group col-4" style="margin-left: 10px;">
+                                        <label for="editGender@(Employee.Id)">Giới tính</label>
+                                        <select disabled class="form-control" id="editGender@(Employee.Id)" name="Gender">
+                                            @{
+                                                var genders = new List<string> { "Male", "Female", "Other" };
+                                                foreach (var gender in genders)
+                                                {
+                                                    if (Employee.Gender == gender)
+                                                    {
+                                                        <option value="@gender" selected>
+                                                            @(gender == "Male" ? "Nam" : gender == "Female" ? "Nữ" :
+                                                            "Khác")
+                                                        </option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@gender">
+                                                            @(gender == "Male" ? "Nam" : gender == "Female" ? "Nữ" : "Khác")
+                                                        </option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-4" style="margin-left: 10px;">
+                                        <label for="editAddress@(Employee.Id)">Địa chỉ</label>
+                                        <input disabled type="text" class="form-control" id="editAddress@(Employee.Id)" name="Address"
+                                               value="@Employee.Address">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editCitizenID@(Employee.Id)">Chứng minh nhân dân</label>
+                            <input disabled type="text" class="form-control editCitizenID" id="editCitizenID@(Employee.Id)" name="CitizenID"
+                                   value="@Employee.CitizenID">
+                            <span class="error-message" style="color: red; display: none;">Chứng minh nhân dân phải có đúng 12 chữ số</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editHireDate@(Employee.Id)">Ngày vào làm</label>
+                            <input disabled type="date" class="form-control" id="editHireDate@(Employee.Id)" name="HireDate"
+                                   value="@Employee.HireDate.ToString("yyyy-MM-dd")">
+                        </div>
+@* 
+                        <div class="form-group">
+                            <label for="editRole@(Employee.Id)">Quyền</label>
+                            <select disabled class="form-control" id="editRole@(Employee.Id)" name="Role">
+                                @{
+                                    var roles = new Dictionary<int, string>
+                            {
+                            // { 1, "SupperAdmin" },
+                            { 2, "Admin" },
+                            { 3, "User" }
+                            };
+
+                                    foreach (var role in roles)
+                                    {
+                                        if (Employee.Role == role.Key)
+                                        {
+                                            <option value="@role.Key" selected>@role.Value</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@role.Key">@role.Value</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div> *@
+
+                        <div class="form-group">
+                            <label for="editIsActivated@(Employee.Id)">Trạng thái kích hoạt</label>
+                            <select disabled class="form-control" id="editIsActivated@(Employee.Id)" name="IsActivated">
+                                @{
+                                    var isActivated = new Dictionary<bool, string>
+                            {
+                            {
+                            true, "Kích hoạt"
+                            },
+                            {
+                            false, "Chưa kích hoạt"
+                            }
+                            };
+                                    foreach (var ac in isActivated)
+                                    {
+                                        if (Employee.IsActivated == ac.Key)
+                                        {
+                                            <option value="@ac.Key" selected>@ac.Value</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@ac.Key">@ac.Value</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="col-12" style="display: flex;">
+                                <div class="form-group col-6">
+                                    <label for="editDepartmentID@(Employee.Id)">Phòng ban</label>
+                                    <select disabled class="form-control" id="editDepartmentID@(Employee.Id)" name="DepartmentID">
+                                        @{
+                                            var departments = ViewData["departments"] as List<DepartmentDto>;
+                                            foreach (var department in departments)
+                                            {
+                                                if (department.Id == Employee.DepartmentID)
+                                                {
+                                                    <option value="@department.Id" selected>@department.DepartmentName</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@department.Id">@department.DepartmentName</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group col-6" style="margin-left: 5px;">
+                                    <label for="editPositionID@(Employee.Id)">Chức vụ</label>
+                                    <select disabled class="form-control" id="editPositionID@(Employee.Id)" name="PositionID">
+                                        @{
+                                            var positions = ViewData["positions"] as List<PositionDto>;
+                                            foreach (var position in positions)
+                                            {
+                                                if (position.Id == Employee.PositionID)
+                                                {
+                                                    <option value="@position.Id" selected>@position.PositionName</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@position.Id">@position.PositionName</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="col-12" style="display: flex;">
+                                <div class="form-group col-6">
+                                    <label for="editEducationLevelID@(Employee.Id)">Trình độ học vấn</label>
+                                    <select disabled class="form-control" id="editEducationLevelID@(Employee.Id)" name="EducationLevelID">
+                                        @{
+                                            var educationLevels = ViewData["educationLevels"] as List<EducationLevelDto>;
+                                            foreach (var educationLevel in educationLevels)
+                                            {
+                                                if (educationLevel.Id == Employee.EducationLevelID)
+                                                {
+                                                    <option value="@educationLevel.Id" selected>@educationLevel.EducationLevelName</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@educationLevel.Id">@educationLevel.EducationLevelName</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </div>
+
+
+                                <div class="form-group col-6" style="margin-left: 5px;">
+                                    <label for="editForeignLanguageProficiency@(Employee.Id)">Trình độ ngoại ngữ</label>
+                                    <select disabled class="form-control" id="editForeignLanguageProficiency@(Employee.Id)"
+                                            name="ForeignLanguageProficiency">
+                                        @{
+                                            var foreignLanguageProficiency = new Dictionary<bool, string>
+                                    {
+                                    { true, "Có" },
+                                    { false, "Không" }
+
+                                    };
+                                            foreach (var proficiency in foreignLanguageProficiency)
+                                            {
+                                                if (Employee.ForeignLanguageProficiency == proficiency.Key)
+                                                {
+                                                    <option value="@proficiency.Key" selected>@proficiency.Value</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@proficiency.Key">@proficiency.Value</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="editBasicSalary@(Employee.Id)">Lương cơ bản</label>
+                                <input disabled type="text" class="form-control number-format" id="editBasicSalary@(Employee.Id)"
+                                       name="BasicSalaryString" value="@Employee.BasicSalaryString">
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập số.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+             @*        <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-info">Lưu</button>
+                    </div> *@
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('.editPhoneNumber').on('input', function () {
+            const phoneNumber = $(this).val();
+            const pattern = /^\d{10}$/;
+            if (!pattern.test(phoneNumber)) {
+                $(this).siblings('.error-message').show();
+            } else {
+                $(this).siblings('.error-message').hide();
+            }
+
+            // Loại bỏ các ký tự không phải số và giới hạn độ dài
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+        $('.editCitizenID').on('input', function () {
+            const phoneNumber = $(this).val();
+            const pattern = /^\d{12}$/;
+            if (!pattern.test(phoneNumber)) {
+                $(this).siblings('.error-message').show();
+            } else {
+                $(this).siblings('.error-message').hide();
+            }
+
+            // Loại bỏ các ký tự không phải số và giới hạn độ dài
+            this.value = this.value.replace(/\D/g, '').slice(0, 12);
+        });
+    });
+</script>

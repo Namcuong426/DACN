@@ -1,0 +1,301 @@
+﻿@using EmployeeManagement.Dto
+@{
+    int currentMonth = DateTime.Now.Month; // Get the current month
+}
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+    var isAdmin = User.IsInRole("ADMIN") || User.IsInRole("SUPPER_ADMIN");
+    var attendances = Model.GenericResponse.Data as List<AttendanceDto>;
+    var pageSize = (int)TempData["PageSize"];
+    var years = TempData["Years"] as List<int>;
+   
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="mb-0">
+            @if (isAdmin)
+            {
+                <text>Quản lý điểm danh</text>
+            }
+            else
+            {
+                <text>Chấm công</text>
+            }
+        </h6>
+    </div>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAttendanceModal">
+        @if (isAdmin)
+        {
+            <text>Thêm mới</text>
+        }
+        else
+        {
+            <text>Chấm công</text>
+        }
+    </button>
+    @if (isAdmin)
+    {
+        <button type="button" class="btn btn-danger" id="deleteSelected" data-toggle="modal" data-target="#deleteAll">
+            Xoá mục đã chọn
+        </button>
+    }
+    <form id="searchForm" method="get" asp-action="Index" asp-controller="Attendance"
+        class="d-flex justify-content-between">
+        <div class="form-group" style="flex-basis: calc(50% - 5px); margin-right: 10px;">
+            <label for="searchMonth">Tháng</label>
+            <select  class="form-control" id="searchMonth" name="searchMonth">
+                <option value="">-- Chọn tháng --</option>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <option value="@i">@(i)</option>
+                }
+            </select>
+        </div>
+        <div class="form-group" style="flex-basis: calc(50% - 5px); margin-right: 10px;">
+            <label for="searchYear">Năm</label>
+            @if(isAdmin){
+                 <select  class="form-control" id="searchYear" name="searchYear">
+                <option value="">-- Chọn năm --</option>
+                @foreach(var year in years)
+                {
+                    <option value="@year" >@(year)</option>
+                })
+            </select>
+
+            }
+            else{
+                <input type="text" class="form-control" id="searchYear" name="searchYear" value="@DateTime.Now.Year" readonly>
+            }
+        </div>
+        @if (isAdmin)
+        {
+            <div class="form-group" style="flex-basis: 100%; margin-right: 10px;">
+                <label for="searchInput">Nhập từ khóa tìm kiếm</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" name="search" placeholder="Tên nhân viên hoặc mã nhân viên">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="searchInput">Tìm kiếm</label>
+                <button class="btn btn-secondary" type="submit">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        }
+    </form>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @if (isAdmin)
+                {
+                    <th>
+                        <span class="custom-checkbox">
+                            <input type="checkbox" id="selectAll">
+                            <label for="selectAll"></label>
+                        </span>
+                    </th>
+                }
+                
+                <th>
+                    Mã NV
+                </th>
+                <th>
+                    Nhân viên
+                    @if (isAdmin)
+                    {
+                        <a asp-action="Index" asp-controller="Attendance" asp-route-sort="name_asc" class="sort-icon">
+                            <i class="fa fa-sort-alpha-up"></i>
+                        </a>
+                        <!-- Icon sắp xếp giảm -->
+                        <a asp-action="Index" asp-controller="Attendance" asp-route-sort="name_desc" class="sort-icon">
+                            <i class="fa fa-sort-alpha-down"></i>
+                        </a>
+                    }
+                </th>
+                <th>
+                    Ngày
+                    <a asp-action="Index" asp-controller="Attendance" asp-route-sort="attendance_date_asc" class="sort-icon">
+                        <i class="fa fa-sort-up"></i>
+                    </a>
+                    <a asp-action="Index" asp-controller="Attendance" asp-route-sort="attendance_date_desc" class="sort-icon">
+                        <i class="fa fa-sort-down"></i>
+                    </a>
+                </th>
+                <th>
+                    Ghi chú
+                </th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var attendance in Model.GenericResponse.Data)
+            {
+                <tr>
+                    @if(isAdmin){
+                    <td>
+                        <span class="custom-checkbox">
+                            <input type="checkbox" id="@(attendance.Id)" name="options[]" value="@(attendance.Id)">
+                            <label for="checkbox@(attendance.Id)"></label>
+                        </span>
+                    </td>
+                    }
+                    <td>@attendance.EmployeeCode</td>
+                    <td>@attendance.EmployeeName</td>
+                    <td>@attendance.Date.ToString("dd/MM/yyyy")</td>
+                    <td>@attendance.Notes</td>
+                    <td>
+                        <div class="btn-group">
+                            <button type="button" class="detail btn btn-info btn-sm rounded-0 h-button-custom"
+                                data-toggle="modal" data-target="#detailAttendanceModal@(attendance.Id)">
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Chi tiết
+                                                    "></i>
+                            </button>
+                            @if(isAdmin){
+                                <button type="button" class="edit btn btn-success btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#editAttendanceModal@(attendance.Id)">
+                                    <i class="fa fa-edit  mr-2" data-toggle="tooltip" title="Sửa"></i>
+                                </button>
+                                <button type="button" class="delete btn btn-danger btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#deleteAttendanceModal@(attendance.Id)">
+                                    <i class="fa fa-trash" data-toggle="tooltip" title="Xóa"></i>
+                                </button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="clearfix">
+        @if (isAdmin)
+        {
+            <div class="hint-text">
+                Hiển thị <b>@Model.GenericResponse.Data.Count</b> trên tổng số
+                <b>@Model.GenericResponse.TotalCount</b> mục
+            </div>
+        }
+        <ul class="pagination">
+            <li class="page-item @(Model.GenericResponse.Page == 1 ? "disabled" : "")">
+                <a asp-controller="Attendance" asp-action="Index" asp-route-page="1"
+                    asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">Trước</a>
+            </li>
+            @for (int i = 1; i <= Model.GenericResponse.TotalPages; i++)
+            {
+                <li class="page-item @(Model.GenericResponse.Page == i ? "active" : "")">
+                    <a asp-controller="Attendance" asp-action="Index" asp-route-page="@i"
+                        asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.GenericResponse.Page == Model.GenericResponse.TotalPages ? "disabled" : "")">
+                <a asp-controller="Attendance" asp-action="Index" asp-route-page="@Model.GenericResponse.TotalPages"
+                    asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">Tiếp</a>
+            </li>
+        </ul>
+       
+       
+    </div>
+    <div class="" style="display:flex;">
+
+        <select class="form-select" style="width:unset;" id="pageSizeSelect" onchange="changePageSize(this.value)">
+            <option value="5" selected="@(pageSize == 5 ? "selected" : null)">5</option>
+            <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10</option>
+            <option value="20" selected="@(pageSize == 20 ? "selected" : null)">20</option>
+
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+</div>
+
+@if (!isAdmin)
+{
+    // Hiển thị số ngày công của nhân viên
+    <br />
+    <div class="text-xl">
+       Bạn có  <b>@Model.GenericResponse.Data.Count</b> ngày công trong tháng
+    </div>
+}
+
+
+@await Html.PartialAsync("_Add", (object)Model)
+@await Html.PartialAsync("_Update", (object)Model)
+@await Html.PartialAsync("_Delete", (object)Model)
+@await Html.PartialAsync("_Detail", (object)Model)
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#deletesByIds').click(function () {
+                var selectedIds = [];
+                $('input[type="checkbox"]:checked').each(function () {
+                    selectedIds.push(parseInt($(this).val()));
+                });
+                if (selectedIds.length > 0) {
+                    $.ajax({
+                        url: '/Attendance/delete-by-ids',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(selectedIds),
+                        success: function (response) {
+                            $('#successMessage').text('Xóa thành công.');
+                            window.location.reload();
+                        },
+                        error: function () {
+                            $('#errorMessage').text('Có lỗi xảy ra trong quá trình xóa.');
+
+                        }
+                    });
+                } else {
+                    alert('Vui lòng chọn ít nhất một mục để xóa.');
+                }
+            });
+        });
+
+        function changePageSize(pageSize) {
+            var url = new URL(window.location.href)
+            console.log(url);      // Check if the pageSize query parameter already exists
+            try {
+                if (url.searchParams.has('pageSize')) {
+                    // If it exists, update the existing value
+                    url.searchParams.set('pageSize', pageSize);
+
+                } else {
+                    // If it doesn't exist, add the new query parameter
+                    url.searchParams.append('pageSize', pageSize);
+                }
+            } catch {
+
+                console.log("error");
+            }
+            // Redirect to the modified URL
+            window.location.href = url.toString();
+        }
+
+    </script>
+}

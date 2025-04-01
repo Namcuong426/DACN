@@ -1,0 +1,374 @@
+﻿@using EmployeeManagement.Dto
+@using EmployeeManagement.Enum
+@using EmployeeManagement.Helper
+@using System.Text.Json
+@{
+    var userName = User.Identity.Name;
+    var isAdmin = User.IsInRole(nameof(Role.ADMIN)) || User.IsInRole(nameof(Role.SUPPER_ADMIN));
+    var Salarys = Model.GenericResponse.Data as List<SalaryDto>;
+    var years = ViewData["Years"] as List<int>;
+    int currentMonth = DateTime.Now.Month;
+    var pageSize = (int)TempData["PageSize"];
+    var a = Model.GenericResponse.Data;
+
+    int monthSelected = ViewData["searchMonth"] != null ? Convert.ToInt32(ViewData["searchMonth"]) : 0;
+}
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div id="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+        @successMessage
+        <span id="successMessage"></span>
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true"></span>
+        </button>
+    </div>
+
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @errorMessage
+        <span id="errorMessage"></span>
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true"></span>
+        </button>
+    </div>
+}
+
+
+<div class="table-responsive">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h6 class="mb-0">
+            @if (isAdmin)
+            {
+                <text>Quản lý Lương</text>
+            }
+            else
+            {
+                <text>Lịch sử Lương</text>
+            }
+        </h6>
+    </div>
+    @if (isAdmin)
+    {
+       
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addSalaryModal">
+                    Tính lương
+                </button>
+                <button type="button" class="btn btn-danger" id="deleteSelected" data-toggle="modal" data-target="#deleteAll">
+                    Xoá mục đã chọn
+                </button>
+            </div>
+            <a class="btn btn-success" id="exportExcelButton" href="#">Xuất Excel</a>
+        </div>
+    }
+    <form id="searchForm" method="get" asp-action="index" asp-controller="Salary"
+        class="d-flex justify-content-between">
+        <div class="form-group" style="flex-basis: calc(50% - 5px); margin-right: 10px;">
+            <label for="searchMonth">Tháng</label>
+            <select class="form-control" id="searchMonth" name="searchMonth">
+                <option value="">-- Chọn tháng --</option>
+                @for (int month = 1; month <= 12; month++)
+                {
+                    <option value="@month" selected=@(monthSelected == month ? "selected" : "")>@month</option>
+                }
+            </select>
+        </div>
+        <div class="form-group" style="flex-basis: calc(50% - 5px); margin-right: 10px;">
+            <label for="searchYear">Năm</label>
+            <select class="form-control" id="searchYear" name="searchYear">
+                <option value="">-- Chọn năm --</option>
+                @foreach(var year in years)
+                {
+                    <option value="@year" >@year</option>
+                })
+            </select>
+        </div>
+
+        @if (isAdmin)
+        {
+            <div class="form-group" style="flex-basis: 100%; margin-right: 10px;">
+                <label for="searchMonth">Nhập từ khóa tìm kiếm</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" name="search" placeholder="Tên nhân viên hoặc mã nhân viên">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="searchInput">Tìm kiếm</label>
+                <button class="btn btn-secondary" type="submit">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        }
+    </form>
+
+</div>
+
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                @if (isAdmin)
+                {
+                    <th>
+                        <span class="custom-checkbox">
+                            <input type="checkbox" id="selectAll">
+                            <label for="selectAll"></label>
+                        </span>
+                    </th>
+                }
+                <th>
+                    Mã nhân viên
+                
+                </th>
+                <th>
+                    Tên Nhân viên
+                    @if (isAdmin)
+                    {
+                        <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_name_asc" class="sort-icon">
+                            <i class="fa fa-sort-alpha-up"></i>
+                        </a>
+                        <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_name_desc" class="sort-icon">
+                            <i class="fa fa-sort-alpha-down"></i>
+                        </a>
+                    }
+
+                </th>
+                <th>
+                    Tháng
+                    <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_month_asc" class="sort-icon">
+                        <i class="fa fa-sort-up"></i>
+                    </a>
+                    <!-- Icon sắp xếp giảm -->
+                    <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_month_desc" class="sort-icon">
+                        <i class="fa fa-sort-down"></i>
+                    </a>
+                </th>
+                <th>
+                     Năm
+                    <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_year_asc" class="sort-icon">
+                        <i class="fa fa-sort-up"></i>
+                    </a>
+                    <a asp-action="Index" asp-controller="Salary" asp-route-sort="salary_year_desc" class="sort-icon">
+                        <i class="fa fa-sort-down"></i>
+                    </a>
+                </th>
+                <th>Lương cơ bản</th>
+                <th>Tiền phụ cấp</th>
+                <th>Tiền thuởng</th>
+                <th>Tiền phạt</th>
+                <th>Tiền đã ứng</th>
+                <th>Số ngày trong tháng</th>
+                <th>Số ngày nghỉ có phép</th>
+                <th>Số ngày nghỉ không phép</th>
+                <th>Số ngày công</th>
+                <th>Lương thực nhận</th>
+                @if (isAdmin)
+                {
+                    <th>Thao tác</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Salary in Model.GenericResponse.Data.Item2 as List<SalaryDto>)
+            {
+                <tr>
+                    @if (isAdmin)
+                    {
+                        <td>
+                            <span class="custom-checkbox">
+                                <input type="checkbox" id="@(Salary.Id)" name="options[]" value="@(Salary.Id)">
+                                <label for="checkbox@(Salary.Id)"></label>
+                            </span>
+                        </td>
+                    }
+                    <td>@Salary.EmployeeCode</td>
+                    <td>@Salary.EmployeeName</td>
+                    <td>@Salary.Month</td>
+                    <td>@Salary.Year</td>
+                    <td>@StringHelper.FormatNumber(Salary.BasicSalary)</td>
+                    <td>@StringHelper.FormatNumber(Salary.Allowance)</td>
+                    <td>@StringHelper.FormatNumber(Salary.Bonus)</td>
+                    <td>@StringHelper.FormatNumber(Salary.Penalty)</td>
+                    <td>@StringHelper.FormatNumber(Salary.SalaryAdvance)</td>
+                    <td>@Salary.TotalDayInMonth</td>
+                    <td>@Salary.TotalLeaveWithPermission</td>
+                    <td>@Salary.TotalLeaveWithoutPermission</td>
+                    <td>@Salary.TotalAttendance</td>
+                    <td>@StringHelper.FormatNumber(Salary.NetSalary)</td>
+
+                    <td>
+                        <div class="btn-group">
+@*                             <button type="button" class="detail btn btn-info btn-sm rounded-0 h-button-custom"
+                                data-toggle="modal" data-target="#detailSalaryModal@(Salary.Id)">
+                                <i class="fa fa-info-circle" data-toggle="tooltip" title="Chi tiết"></i>
+                            </button> *@
+                            @if (isAdmin)
+                            {
+                                @* <button type="button" class="edit btn btn-success btn-sm rounded-0 h-button-custom"
+                                    data-toggle="modal" data-target="#editSalaryModal@(Salary.Id)">
+                                    <i class="fa fa-edit  mr-2" data-toggle="tooltip" title="Sửa"></i>
+                                </button> *@
+                                <button type="button" class="delete btn btn-danger btn-sm rounded-0 h-button-custom"
+                                        data-toggle="modal" data-target="#deleteSalaryModal@(Salary.Id)">
+                                    <i class="fa fa-trash" data-toggle="tooltip" title="Xóa"></i>
+                                </button>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @* input Model.GenericResponse.Data.Item1 để xuất excel *@
+    <input type="hidden" id="salaryDtos" value="@JsonSerializer.Serialize(Model.GenericResponse.Data.Item1)" />
+    <div class="clearfix">
+        <div class="hint-text">
+            @if (isAdmin)
+            {
+                <text>
+                    Hiển thị <b>@Model.GenericResponse.Data.Item2.Count</b> trên tổng số
+                    <b>@Model.GenericResponse.TotalCount</b> mục</text>
+            }
+            else
+            {
+               
+            }
+        </div>
+        <ul class="pagination">
+            <li class="page-item @(Model.GenericResponse.Page == 1 ? "disabled" : "")">
+                <a asp-controller="Salary" asp-action="Index" asp-route-page="1"
+                    asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">Trước</a>
+            </li>
+            @for (int i = 1; i <= Model.GenericResponse.TotalPages; i++)
+            {
+                <li class="page-item @(Model.GenericResponse.Page == i ? "active" : "")">
+                    <a asp-controller="Salary" asp-action="Index" asp-route-page="@i"
+                        asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.GenericResponse.Page == Model.GenericResponse.TotalPages ? "disabled" : "")">
+                <a asp-controller="Salary" asp-action="Index" asp-route-page="@Model.GenericResponse.TotalPages"
+                    asp-route-pageSize="@Model.GenericResponse.PageSize" class="page-link">Tiếp</a>
+            </li>
+        </ul>
+    </div>
+    <div class="" style="display:flex">
+
+        <select class="form-select" style="width:unset;" id="pageSizeSelect" onchange="changePageSize(this.value)">
+            <option value="5" selected="@(pageSize == 5 ? "selected" : null)">5</option>
+            <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10</option>
+            <option value="20" selected="@(pageSize == 20 ? "selected" : null)">20</option>
+
+            <!-- Add more options as needed -->
+        </select>
+    </div>
+    @await Html.PartialAsync("_Add", (object)Model)
+    @await Html.PartialAsync("_Delete", (object)Model)
+
+
+    <script>
+        $(document).ready(function () {
+            $('#exportExcelButton').click(function (e) {
+                e.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+                var jsonData = document.getElementById('salaryDtos').value;
+                var salaryDtos = JSON.parse(jsonData);
+                // Lấy dữ liệu salaryDtos cần gửi tới server
+                
+
+                $.ajax({
+                    url: '/Salary/ExportToExcel',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(salaryDtos),
+                    success: function (data, status, xhr) {
+                        var blob = new Blob([data], { type: xhr.getResponseHeader('Content-Type') });
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = `LuongNhanVien` + /* Date.now() */ + `.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    },
+                    xhrFields: {
+                        responseType: 'blob'
+                    }
+                });
+            });
+        });
+    </script>
+    @section scripts {
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                $('#deletesByIds').click(function () {
+                    var selectedIds = [];
+                    $('input[type="checkbox"]:checked').each(function () {
+                        selectedIds.push(parseInt($(this).val()));
+                    });
+                    if (selectedIds.length > 0) {
+                        $.ajax({
+                            url: '/Salary/delete-by-ids',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(selectedIds),
+                            success: function (response) {
+                                $('#successMessage').text('Xóa thành công.');
+                                window.location.reload();
+                            },
+                            error: function () {
+                                $('#errorMessage').text('Có lỗi xảy ra trong quá trình xóa.');
+
+                            }
+                        });
+                    } else {
+                        alert('Vui lòng chọn ít nhất một mục để xóa.');
+                    }
+                });
+
+
+               
+            });
+
+            function changePageSize(pageSize) {
+                var url = new URL(window.location.href)
+                console.log(url);      // Check if the pageSize query parameter already exists
+                try {
+                    if (url.searchParams.has('pageSize')) {
+                        // If it exists, update the existing value
+                        url.searchParams.set('pageSize', pageSize);
+
+                    } else {
+                        // If it doesn't exist, add the new query parameter
+                        url.searchParams.append('pageSize', pageSize);
+                    }
+                } catch {
+
+                    console.log("error");
+                }
+                // Redirect to the modified URL
+                window.location.href = url.toString();
+            }
+
+        </script>
+    }
